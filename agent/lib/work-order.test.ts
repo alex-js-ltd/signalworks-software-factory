@@ -43,6 +43,12 @@ describe("workOrderSchema", () => {
       summary: "Reproduced the issue locally.",
     });
 
-    expect(result.success).toBe(true);
+    expect(result.evidence).toEqual([
+      {
+        kind: "observation",
+        summary: "Reproduced the issue locally.",
+        recordedAt: expect.any(String),
+      },
+    ]);
   });
 });

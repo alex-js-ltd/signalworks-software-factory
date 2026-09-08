@@ -67,7 +67,7 @@ export function addEvidence(
   workOrder: WorkOrder,
   evidence: Omit<Evidence, "recordedAt">,
 ) {
-  return workOrderSchema.safeParse({
+  return workOrderSchema.parse({
     ...workOrder,
     evidence: [
       ...workOrder.evidence,
