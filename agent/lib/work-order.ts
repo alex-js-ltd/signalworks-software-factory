@@ -59,3 +59,19 @@ export const workOrderSchema = z.object({
     "stopped",
   ]),
 });
+
+export type Evidence = z.infer<typeof evidenceSchema>;
+export type WorkOrder = z.infer<typeof workOrderSchema>;
+
+export function addEvidence(
+  workOrder: WorkOrder,
+  evidence: Omit<Evidence, "recordedAt">,
+) {
+  return workOrderSchema.safeParse({
+    ...workOrder,
+    evidence: [
+      ...workOrder.evidence,
+      { ...evidence, recordedAt: new Date().toISOString() },
+    ],
+  });
+}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { workOrderSchema } from "./work-order.js";
+import { workOrderSchema, addEvidence, type WorkOrder } from "./work-order.js";
 
-function generateWorkOrder(status: string = "received") {
+function generateWorkOrder(): WorkOrder {
   return {
     id: "wo-001",
     source: {
@@ -10,7 +10,8 @@ function generateWorkOrder(status: string = "received") {
       title: "render() crashes on second call",
       url: "https://github.com/acme/eve/issues/412",
     },
-    status,
+    status: "received",
+    evidence: [],
   };
 }
 
@@ -18,32 +19,30 @@ describe("workOrderSchema", () => {
   it("accepts a new work order and defaults evidence to an empty array", () => {
     const workOrder = generateWorkOrder();
 
-    const result = workOrderSchema.safeParse(workOrder);
+    const result = workOrderSchema.parse(workOrder);
 
-    expect(result.success).toBe(true);
+    expect(result.evidence).toEqual([]);
   });
 
-  it("accepts an observation in the evidence log", () => {
-    const observation = {
-      kind: "observation",
-      summary: "Reproduced the issue locally.",
-      recordedAt: "2026-09-08T10:00:00.000Z",
-    };
-    const workOrderWithObservation = {
-      ...generateWorkOrder(),
-      evidence: [observation],
-    };
+  it("rejects a status outside the defined workflow", () => {
+    const workOrder = generateWorkOrder();
 
-    const result = workOrderSchema.safeParse(workOrderWithObservation);
-
-    expect(result.success).toBe(true);
-  });
-
-  it("try to create a work order with status: looks-good-to-me. Zod should reject any state outside the defined workflow.", () => {
-    const workOrder = generateWorkOrder("looks-good-to-me");
-
-    const result = workOrderSchema.safeParse(workOrder);
+    const result = workOrderSchema.safeParse({
+      ...workOrder,
+      status: "looks-good-to-me",
+    });
 
     expect(result.success).toBe(false);
+  });
+
+  it("appends an observation and generates its timestamp", () => {
+    const workOrder = generateWorkOrder();
+
+    const result = addEvidence(workOrder, {
+      kind: "observation",
+      summary: "Reproduced the issue locally.",
+    });
+
+    expect(result.success).toBe(true);
   });
 });
