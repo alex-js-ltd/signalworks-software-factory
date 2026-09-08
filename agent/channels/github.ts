@@ -5,12 +5,11 @@ import {
 } from "eve/channels/github";
 import { FACTORY_LABEL } from "../lib/config.js";
 import { githubCredentials } from "../lib/github/credentials.js";
+import { normalizeIssue } from "../lib/intake.js";
 
 const trustedLabelerRoles = new Set(["admin", "maintain", "write", "triage"]);
 
-async function isTrustedLabeler(
-  ctx: GitHubInboundContext
-): Promise<boolean> {
+async function isTrustedLabeler(ctx: GitHubInboundContext): Promise<boolean> {
   try {
     const response = await ctx.github.request<{
       permission?: string;
@@ -20,7 +19,9 @@ async function isTrustedLabeler(
       path: `/repos/${ctx.repository.owner}/${ctx.repository.name}/collaborators/${encodeURIComponent(ctx.sender.login)}/permission`,
     });
     const role = response.body.role_name ?? response.body.permission;
-    return response.ok && typeof role === "string" && trustedLabelerRoles.has(role);
+    return (
+      response.ok && typeof role === "string" && trustedLabelerRoles.has(role)
+    );
   } catch {
     return false;
   }
@@ -53,10 +54,14 @@ export default githubChannel({
       return null;
     }
 
+    const sourceIssue = normalizeIssue(issue);
+
     return {
       auth: defaultGitHubAuth(ctx),
-      context: [intakeTask],
+      context: [
+        intakeTask,
+        `Create the work order from this normalized source issue:\n${JSON.stringify(sourceIssue)}`,
+      ],
     };
   },
 });
-
