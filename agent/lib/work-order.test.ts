@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { workOrderSchema, addEvidence, type WorkOrder } from "./work-order.js";
+import {
+  workOrderSchema,
+  evidenceSchema,
+  addEvidence,
+  type WorkOrder,
+} from "./work-order.js";
 
 function generateWorkOrder(): WorkOrder {
   return {
@@ -30,6 +35,16 @@ describe("workOrderSchema", () => {
     const result = workOrderSchema.safeParse({
       ...workOrder,
       status: "looks-good-to-me",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("requires recordedAt to be an ISO datetime", () => {
+    const result = evidenceSchema.safeParse({
+      kind: "observation",
+      recordedAt: "2026-09-08",
+      summary: "Reproduced the crash",
     });
 
     expect(result.success).toBe(false);
