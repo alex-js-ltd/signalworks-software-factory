@@ -5,5 +5,6 @@ export const MODELS = {
   builder: process.env.BUILDER_MODEL ?? defaultModel,
   investigator: process.env.INVESTIGATOR_MODEL ?? defaultModel,
   orchestrator: process.env.ORCHESTRATOR_MODEL ?? defaultModel,
+  router: process.env.ROUTER_MODEL ?? defaultModel,
   verifier: process.env.VERIFIER_MODEL ?? defaultModel,
 } as const;
