@@ -63,6 +63,8 @@ export const workOrderSchema = z.object({
 export type Evidence = z.infer<typeof evidenceSchema>;
 export type WorkOrder = z.infer<typeof workOrderSchema>;
 
+export type WorkRoute = NonNullable<WorkOrder["route"]>;
+
 export function addEvidence(
   workOrder: WorkOrder,
   evidence: Omit<Evidence, "recordedAt">,
